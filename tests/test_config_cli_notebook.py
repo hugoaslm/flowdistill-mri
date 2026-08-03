@@ -24,7 +24,8 @@ def test_notebook_is_valid_and_long_jobs_are_opt_in():
     assert "RUN_CPU_SMOKE = False" in source
     assert "RUN_TEACHER = False" in source
     assert "RUN_DISTILLATION = False" in source
-    assert "pip', 'install', 'pyyaml>=6', 'safetensors>=0.4'" in source
+    assert "pip', 'install', '--quiet', 'pyyaml>=6', 'safetensors>=0.4'" in source
+    assert "'pull', '--ff-only'" in source
 
 
 def test_track_b_is_explicitly_disabled():

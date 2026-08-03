@@ -99,12 +99,21 @@ def distill_freeflow(
         )
         if manifest.get("config") != json.loads(json.dumps(cfg.to_dict())):
             raise ValueError("resume config differs from the checkpoint config")
+        print(f"[freeflow] resumed from step {start}", flush=True)
     elif output.exists() and any(output.iterdir()):
         raise FileExistsError(f"refusing to overwrite non-empty checkpoint directory: {output}")
     if start >= cfg.training.distillation_steps:
+        print(f"[freeflow] checkpoint already complete: {output}", flush=True)
         return output
     prediction = auxiliary = torch.tensor(float("nan"))
     total = cfg.training.distillation_steps
+    parameters = sum(parameter.numel() for parameter in student.parameters())
+    print(
+        f"[freeflow] device={device} steps={total} batch={cfg.training.batch_size} "
+        f"parameters={parameters:,} data=prior-only",
+        flush=True,
+    )
+    report_every = max(1, total // 10)
     for step in range(start, total):
         noise = torch.randn(
             cfg.training.batch_size,
@@ -124,6 +133,13 @@ def distill_freeflow(
             step / max(total, 1),
         )
         ema.update(student.backbone)
+        completed = step + 1
+        if completed == total or completed % report_every == 0:
+            print(
+                f"[freeflow] step {completed}/{total} prediction={float(prediction):.6f} "
+                f"auxiliary={float(auxiliary):.6f}",
+                flush=True,
+            )
     save_checkpoint(
         output,
         {"student": student, "student_ema": ema.shadow, "corrector": corrector},
@@ -139,4 +155,5 @@ def distill_freeflow(
         },
         {"student": student_optimizer, "corrector": corrector_optimizer},
     )
+    print(f"[freeflow] checkpoint saved: {output}", flush=True)
     return output

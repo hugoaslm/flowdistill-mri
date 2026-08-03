@@ -45,7 +45,8 @@ an explicit resume checkpoint is supplied. MRI data and checkpoints are ignored 
 
 Open [`notebooks/flowdistill_mri_colab.ipynb`](notebooks/flowdistill_mri_colab.ipynb) in Colab. The
 notebook clones this repository, optionally mounts Google Drive, and calls the same CLI used above.
-Long-running cells are opt-in.
+Rerunning its setup cell pulls the latest `main` revision with `--ff-only`. Long-running cells are
+opt-in.
 
 ## Data
 

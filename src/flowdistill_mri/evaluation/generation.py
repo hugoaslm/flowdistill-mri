@@ -20,6 +20,7 @@ def evaluate_generation(
     student_checkpoint: str | Path,
     output: str | Path,
 ) -> dict[str, float]:
+    print("[evaluation] loading teacher and student checkpoints", flush=True)
     set_seed(cfg.seed)
     device = select_device(cfg.device)
     teacher = build_teacher(cfg).to(device).eval()
@@ -27,6 +28,7 @@ def evaluate_generation(
     load_checkpoint(teacher_checkpoint, {"teacher": teacher}, restore_rng=False)
     load_checkpoint(student_checkpoint, {"student": student}, restore_rng=False)
     noise = torch.randn(4, 2, cfg.data.resolution, cfg.data.resolution, device=device)
+    print("[evaluation] generating 4 paired samples", flush=True)
     schedule = torch.linspace(0, 1, cfg.sampling.teacher_steps + 1, device=device)
     target = teacher.sample(noise, schedule, cfg.sampling.solver)
     prediction = student.map_from_prior(noise, torch.ones(4, device=device))
@@ -42,5 +44,5 @@ def evaluate_generation(
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     (output / "generation_metrics.json").write_text(json.dumps(results, indent=2), encoding="utf-8")
+    print(f"[evaluation] metrics saved: {output / 'generation_metrics.json'}", flush=True)
     return results
-

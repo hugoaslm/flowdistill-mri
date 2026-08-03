@@ -36,6 +36,7 @@ def train_teacher(cfg: Config, output: str | Path, *, resume: bool = False) -> P
     optimizer = torch.optim.AdamW(teacher.parameters(), lr=cfg.training.learning_rate)
     output = Path(output)
     start = 0
+    total = cfg.training.teacher_steps
     if resume:
         start, manifest = load_checkpoint(
             output,
@@ -48,21 +49,33 @@ def train_teacher(cfg: Config, output: str | Path, *, resume: bool = False) -> P
         )
         if manifest.get("config") != json.loads(json.dumps(cfg.to_dict())):
             raise ValueError("resume config differs from the checkpoint config")
+        print(f"[teacher] resumed from step {start}", flush=True)
     elif output.exists() and any(output.iterdir()):
         raise FileExistsError(f"refusing to overwrite non-empty checkpoint directory: {output}")
     batches = infinite_batches(build_dataset(cfg), cfg.training.batch_size, cfg.seed)
     for _ in range(start):
         next(batches)
-    if start >= cfg.training.teacher_steps:
+    if start >= total:
+        print(f"[teacher] checkpoint already complete: {output}", flush=True)
         return output
+    parameters = sum(parameter.numel() for parameter in teacher.parameters())
+    print(
+        f"[teacher] device={device} steps={total} batch={cfg.training.batch_size} "
+        f"parameters={parameters:,}",
+        flush=True,
+    )
     loss = torch.tensor(float("nan"))
-    for _ in range(start, cfg.training.teacher_steps):
+    report_every = max(1, total // 10)
+    for step in range(start, total):
         loss = teacher_step(teacher, optimizer, next(batches).to(device))
         ema.update(teacher.backbone)
+        completed = step + 1
+        if completed == total or completed % report_every == 0:
+            print(f"[teacher] step {completed}/{total} loss={float(loss):.6f}", flush=True)
     save_checkpoint(
         output,
         {"teacher": teacher, "teacher_ema": ema.shadow},
-        cfg.training.teacher_steps,
+        total,
         {
             "model_type": "rectified_flow_teacher",
             "time_convention": "t0_noise_t1_data",
@@ -71,4 +84,5 @@ def train_teacher(cfg: Config, output: str | Path, *, resume: bool = False) -> P
         },
         {"optimizer": optimizer},
     )
+    print(f"[teacher] checkpoint saved: {output}", flush=True)
     return output

@@ -44,9 +44,14 @@ def _inspect(args: argparse.Namespace) -> None:
 def _smoke(args: argparse.Namespace) -> None:
     cfg = load_config(Path("configs") / f"smoke_{args.tier}.yaml")
     run = create_run_directory(cfg, f"smoke-{args.tier}")
+    print(f"[smoke] tier={args.tier} run={run}", flush=True)
+    print("[smoke] stage 1/3: teacher", flush=True)
     teacher_checkpoint = train_teacher(cfg, run / "teacher")
+    print("[smoke] stage 2/3: FreeFlow distillation", flush=True)
     student_checkpoint = distill_freeflow(cfg, teacher_checkpoint, run / "freeflow")
+    print("[smoke] stage 3/3: evaluation", flush=True)
     results = evaluate_generation(cfg, teacher_checkpoint, student_checkpoint, run / "evaluation")
+    print("[smoke] complete", flush=True)
     print(json.dumps({"run": str(run), "results": results}, indent=2))
 
 
