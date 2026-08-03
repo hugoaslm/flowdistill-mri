@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flowdistill-mri"
+version = "0.1.0"
+description = "CPU-first FreeFlow distillation research for accelerated MRI"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "numpy>=1.24",
+  "pyyaml>=6",
+  "safetensors>=0.4",
+  "torch>=2.2",
+]
+
+[project.optional-dependencies]
+mri = ["h5py>=3.9", "scikit-image>=0.21"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+flowdistill-mri = "flowdistill_mri.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+

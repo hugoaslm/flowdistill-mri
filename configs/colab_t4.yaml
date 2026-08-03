@@ -1,0 +1,36 @@
+experiment: colab_t4
+seed: 42
+device: cuda
+output_root: outputs
+data:
+  kind: fastmri
+  resolution: 192
+  acceleration: 4
+  center_fraction: 0.08
+model:
+  base_channels: 64
+  channel_multipliers: [1, 2, 2, 4]
+  residual_blocks: 2
+  time_dim: 256
+training:
+  batch_size: 1
+  gradient_accumulation: 8
+  teacher_steps: 100000
+  distillation_steps: 100000
+  learning_rate: 0.0001
+  precision: fp16
+  gradient_checkpointing: true
+  ema_decay: 0.999
+distillation:
+  intervals: 8
+  prediction_probability: 0.75
+  correction_weight: 0.3
+  correction_delay: 0.1
+  correction_warmup: 0.1
+  norm_exponent: 1.0
+sampling:
+  teacher_steps: 16
+  solver: heun
+track_b:
+  enabled: false
+

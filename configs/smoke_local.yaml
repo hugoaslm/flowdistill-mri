@@ -1,0 +1,34 @@
+experiment: smoke_local
+seed: 42
+device: cpu
+output_root: outputs
+data:
+  kind: synthetic
+  samples: 32
+  resolution: 64
+  acceleration: 4
+  center_fraction: 0.08
+model:
+  base_channels: 16
+  channel_multipliers: [1, 2, 2]
+  residual_blocks: 1
+  time_dim: 64
+training:
+  batch_size: 2
+  teacher_steps: 20
+  distillation_steps: 20
+  learning_rate: 0.0005
+  ema_decay: 0.995
+distillation:
+  intervals: 8
+  prediction_probability: 0.75
+  correction_weight: 0.3
+  correction_delay: 0.1
+  correction_warmup: 0.1
+  norm_exponent: 1.0
+sampling:
+  teacher_steps: 8
+  solver: heun
+track_b:
+  enabled: false
+
