@@ -28,6 +28,19 @@ def test_notebook_is_valid_and_long_jobs_are_opt_in():
     assert "'pull', '--ff-only'" in source
 
 
+def test_fastmri_download_notebook_is_safe_and_opt_in():
+    path = Path("notebooks/download_fastmri_to_drive.ipynb")
+    notebook = json.loads(path.read_text(encoding="utf-8"))
+    source = "\n".join("".join(cell.get("source", [])) for cell in notebook["cells"])
+    assert notebook["nbformat"] == 4
+    assert "RUN_DOWNLOADS = False" in source
+    assert "RUN_EXTRACTION = False" in source
+    assert "FASTMRI_KNEE_VAL_URL" in source
+    assert "FASTMRI_KNEE_TRAIN_URL" in source
+    assert "AWSAccessKeyId=" not in source
+    assert "CONFIRM_ARCHIVE_DELETION = ''" in source
+
+
 def test_track_b_is_explicitly_disabled():
     with pytest.raises(NotImplementedError, match="Track B"):
         train_two_time_flow_map()

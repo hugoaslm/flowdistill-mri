@@ -48,6 +48,9 @@ notebook clones this repository, optionally mounts Google Drive, and calls the s
 Rerunning its setup cell pulls the latest `main` revision with `--ff-only`. Long-running cells are
 opt-in.
 
+Use [`notebooks/download_fastmri_to_drive.ipynb`](notebooks/download_fastmri_to_drive.ipynb) to
+download the authorized knee single-coil archives directly into Google Drive using Colab Secrets.
+
 ## Data
 
 No dataset is downloaded automatically. Future fastMRI support requires independent acceptance of
