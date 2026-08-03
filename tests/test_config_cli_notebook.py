@@ -39,6 +39,9 @@ def test_fastmri_download_notebook_is_safe_and_opt_in():
     assert "FASTMRI_KNEE_TRAIN_URL" in source
     assert "AWSAccessKeyId=" not in source
     assert "CONFIRM_ARCHIVE_DELETION = ''" in source
+    assert "'--progress-bar'" in source
+    assert "run_tar_with_progress" in source
+    assert "RUN_FULL_HDF5_CHECK = False" in source
 
 
 def test_track_b_is_explicitly_disabled():
